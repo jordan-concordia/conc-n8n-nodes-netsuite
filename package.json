@@ -1,6 +1,6 @@
 {
-  "name": "@ianpogi5/n8n-nodes-netsuite",
-  "version": "0.7.7",
+  "name": "@drowl87/n8n-nodes-netsuite",
+  "version": "0.7.8",
   "description": "n8n node for NetSuite using the REST API",
   "license": "MIT",
   "homepage": "https://github.com/drudge/n8n-nodes-netsuite",
