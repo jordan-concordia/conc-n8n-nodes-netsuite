@@ -1,6 +1,6 @@
 {
   "name": "@drowl87/n8n-nodes-netsuite",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "n8n node for NetSuite using the REST API. This version has a few patches and adds support for Advanced Intercompany Journal Entries.",
   "license": "MIT",
   "homepage": "https://github.com/drowl87/n8n-nodes-netsuite",
@@ -64,7 +64,7 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
-    "@drowl87/netsuite-rest-api-client": "^1.0.1",
+    "@drowl87/netsuite-rest-api-client": "^1.0.2",
     "p-limit": "^3.1.0"
   },
   "bugs": {
