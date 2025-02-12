@@ -1,8 +1,5 @@
 import { INodeTypeDescription, NodeConnectionType } from "n8n-workflow";
 
-inputs: [NodeConnectionType.Main],
-outputs: [NodeConnectionType.Main],
-
 /**
  * Options to be displayed
  */
@@ -17,8 +14,8 @@ export const nodeDescription: INodeTypeDescription = {
 		color: "#125580",
 	},
 	icon: "file:netSuite.svg",
-	inputs: ["main"],
-	outputs: ["main"],
+	inputs: [NodeConnectionType.Main],
+	outputs: [NodeConnectionType.Main],
 	credentials: [
 		{
 			name: "netsuite",
