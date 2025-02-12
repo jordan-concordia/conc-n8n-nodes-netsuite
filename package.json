@@ -49,13 +49,16 @@
   },
   "devDependencies": {
     "@eslint/config-array": "^0.19.2",
+    "@eslint/js": "^9.20.0",
     "@eslint/object-schema": "^2.1.6",
     "@types/node": "^18.19.39",
     "@typescript-eslint/parser": "^8.24.0",
     "eslint": "^9.20.1",
+    "globals": "^15.15.0",
     "gulp": "^5.0.0",
     "n8n-workflow": "*",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.24.0"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
