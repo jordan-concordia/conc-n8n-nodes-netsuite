@@ -43,9 +43,11 @@
     ]
   },
   "devDependencies": {
+    "@eslint/config-array": "^0.19.2",
+    "@eslint/object-schema": "^2.1.6",
     "@types/node": "^18.19.39",
-    "@typescript-eslint/parser": "^7.16.0",
-    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.20.1",
     "gulp": "^5.0.0",
     "n8n-workflow": "*",
     "typescript": "^5.5.3"
