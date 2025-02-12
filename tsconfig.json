@@ -25,5 +25,7 @@
 		"nodes/**/*",
 		"nodes/**/*.json",
 		"package.json",
+		"@types/**/*.d.ts",
+    "nodes/**/*.ts"
 	],
 }
