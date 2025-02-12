@@ -56,7 +56,9 @@ const handleNetsuiteResponse = (fns: IExecuteFunctions, response: INetSuiteRespo
 		}
 	} else {
 		body = response.body;
-		if ([ 'POST', 'PATCH', 'DELETE' ].includes(response.request.options.method)) {
+		// Ensure response.request.options is not null and has a 'method' property.
+		const requestOptions = response.request.options as { method?: string } | null;
+		if (requestOptions?.method && [ 'POST', 'PATCH', 'DELETE' ].includes(requestOptions.method)) {
 			body = typeof body === 'object' ? response.body : {};
 			if (response.headers['x-netsuite-propertyvalidation']) {
 				body.propertyValidation = response.headers['x-netsuite-propertyvalidation'].split(',');
@@ -74,7 +76,12 @@ const handleNetsuiteResponse = (fns: IExecuteFunctions, response: INetSuiteRespo
 						href: response.headers['location'],
 					},
 				];
-				body.id = response.headers['location'].split('/').pop();
+				// Guard against undefined: split and check the result.
+				const locParts = response.headers['location'].split('/');
+				const locId = locParts.pop() ?? null;
+				if (locId !== null) {
+					body.id = locId;
+				}
 			}
 			body.success = response.statusCode === 204;
 		}
@@ -169,6 +176,7 @@ export class NetSuite implements INodeType {
 		const nodeContext = fns.getContext('node');
 		const apiVersion = fns.getNodeParameter('version', itemIndex) as string;
 		const returnAll = fns.getNodeParameter('returnAll', itemIndex) as boolean;
+		// For SuiteQL the query is provided as a string.
 		const query = fns.getNodeParameter('query', itemIndex) as string;
 		let limit = 1000;
 		let offset = 0;
@@ -191,7 +199,8 @@ export class NetSuite implements INodeType {
 		const requestData: INetSuiteRequestOptions = {
 			method,
 			requestType,
-			query,
+			// Wrap the SuiteQL query string in an object so it matches the expected type.
+			query: { query },
 			path: `services/rest/query/${apiVersion}/suiteql${prefix}`,
 		};
 		nodeContext.hasMore = hasMore;
@@ -268,13 +277,17 @@ export class NetSuite implements INodeType {
 		const { fns, credentials, itemIndex, item } = options;
 		const apiVersion = fns.getNodeParameter('version', itemIndex) as string;
 		const recordType = NetSuite.getRecordType(options);
+		// Expecting an object from the incoming item.
 		const query = item ? item.json : undefined;
 		const requestData: INetSuiteRequestOptions = {
 			method: 'POST',
 			requestType: NetSuiteRequestType.Record,
 			path: `services/rest/record/${apiVersion}/${recordType}`,
 		};
-		if (query) requestData.query = query;
+		if (query) {
+			// Cast to the expected type.
+			requestData.query = query as Record<string, string | number | boolean>;
+		}
 		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
 	}
@@ -284,13 +297,17 @@ export class NetSuite implements INodeType {
 		const apiVersion = fns.getNodeParameter('version', itemIndex) as string;
 		const recordType = NetSuite.getRecordType(options);
 		const internalId = fns.getNodeParameter('internalId', itemIndex) as string;
+		// Expecting an object from the incoming item.
 		const query = item ? item.json : undefined;
 		const requestData: INetSuiteRequestOptions = {
 			method: 'PATCH',
 			requestType: NetSuiteRequestType.Record,
 			path: `services/rest/record/${apiVersion}/${recordType}/${internalId}`,
 		};
-		if (query) requestData.query = query;
+		if (query) {
+			// Cast to the expected type.
+			requestData.query = query as Record<string, string | number | boolean>;
+		}
 		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
 	}
@@ -302,6 +319,7 @@ export class NetSuite implements INodeType {
 		const method = fns.getNodeParameter('method', itemIndex) as string;
 		const body = fns.getNodeParameter('body', itemIndex) as string;
 		const requestType = fns.getNodeParameter('requestType', itemIndex) as NetSuiteRequestType;
+		// The query can come as a string (body) or an object (from the item).
 		const query = body || (item ? item.json : undefined);
 		const nodeOptions = fns.getNodeParameter('options', 0) as IDataObject;
 
@@ -315,7 +333,12 @@ export class NetSuite implements INodeType {
 			requestType,
 			path,
 		};
-		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) requestData.query = query;
+		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+			// If query is a string, wrap it; otherwise cast it.
+			requestData.query = typeof query === 'string'
+				? { query }
+				: query as Record<string, string | number | boolean>;
+		}
 		// debug('requestData', requestData);
 		const response = await makeRequest(getConfig(credentials), requestData);
 
@@ -346,29 +369,29 @@ export class NetSuite implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 		const promises = [];
 		const options = this.getNodeParameter('options', 0) as IDataObject;
-		const concurrency = options.concurrency as number || 1;
+		const concurrency = (options.concurrency as number) || 1;
 		const limit = pLimit(concurrency);
 
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			const item: INodeExecutionData = items[itemIndex];
 			let data: INodeExecutionData | INodeExecutionData[];
 
-			promises.push(limit(async () =>{
-				debug(`Processing ${operation} for ${itemIndex+1} of ${items.length}`);
+			promises.push(limit(async () => {
+				debug(`Processing ${operation} for ${itemIndex + 1} of ${items.length}`);
 				if (operation === 'getRecord') {
-					data = await NetSuite.getRecord({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.getRecord({ item, fns: this, credentials, itemIndex });
 				} else if (operation === 'listRecords') {
-					data = await NetSuite.listRecords({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.listRecords({ item, fns: this, credentials, itemIndex });
 				} else if (operation === 'removeRecord') {
-					data = await NetSuite.removeRecord({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.removeRecord({ item, fns: this, credentials, itemIndex });
 				} else if (operation === 'insertRecord') {
-					data = await NetSuite.insertRecord({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.insertRecord({ item, fns: this, credentials, itemIndex });
 				} else if (operation === 'updateRecord') {
-					data = await NetSuite.updateRecord({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.updateRecord({ item, fns: this, credentials, itemIndex });
 				} else if (operation === 'rawRequest') {
-					data = await NetSuite.rawRequest({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.rawRequest({ item, fns: this, credentials, itemIndex });
 				} else if (operation === 'runSuiteQL') {
-					data = await NetSuite.runSuiteQL({ item, fns: this, credentials, itemIndex});
+					data = await NetSuite.runSuiteQL({ item, fns: this, credentials, itemIndex });
 				} else {
 					const error = `The operation "${operation}" is not supported!`;
 					if (this.continueOnFail() !== true) {
