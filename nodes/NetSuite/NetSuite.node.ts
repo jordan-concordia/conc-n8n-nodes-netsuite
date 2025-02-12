@@ -22,7 +22,7 @@ import {
 	nodeDescription,
 } from './NetSuite.node.options';
 
-import { makeRequest } from '@fye/netsuite-rest-api';
+import { makeRequest } from '@drowl87/netsuite-rest-api-client';
 
 import pLimit from 'p-limit';
 
