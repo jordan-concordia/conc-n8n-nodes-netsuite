@@ -22,12 +22,13 @@ export enum NetSuiteRequestType {
 	SuiteQL = 'suiteql',
 	Workbook = 'workbook',
 }
+
 export type INetSuiteRequestOptions = {
 	nextUrl?: string;
 	method: string;
-	body?: any;
-	headers?: any;
-	query?: any;
+	body?: JsonObject | string;
+	headers?: Record<string, string>;
+	query?: Record<string, string | number | boolean>;
 	path?: string;
 	requestType: NetSuiteRequestType;
 };
@@ -36,8 +37,8 @@ export type INetSuiteResponse = {
 	statusCode: number;
 	statusText: string;
 	body: INetSuiteResponseBody;
-	headers: any;
-	request: any;
+	headers: Record<string, string>;
+	request: JsonObject;
 };
 
 export type INetSuiteResponseBody = {
