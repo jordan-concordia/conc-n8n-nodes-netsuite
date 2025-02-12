@@ -24,7 +24,7 @@ import {
 
 import { makeRequest } from '@drowl87/netsuite-rest-api-client';
 
-import pLimit from 'p-limit';
+import pLimit from '@common.js/p-limit';
 
 const debug = debuglog('n8n-nodes-netsuite');
 
