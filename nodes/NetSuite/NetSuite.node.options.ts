@@ -1,4 +1,7 @@
-import { INodeTypeDescription } from "n8n-workflow";
+import { INodeTypeDescription, NodeConnectionType } from "n8n-workflow";
+
+inputs: [NodeConnectionType.Main],
+outputs: [NodeConnectionType.Main],
 
 /**
  * Options to be displayed
