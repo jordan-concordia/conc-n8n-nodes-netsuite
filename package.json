@@ -1,16 +1,16 @@
 {
   "name": "@drowl87/n8n-nodes-netsuite",
   "version": "0.7.8",
-  "description": "n8n node for NetSuite using the REST API",
+  "description": "n8n node for NetSuite using the REST API. This version has a few patches and adds support for Advanced Intercompany Journal Entries.",
   "license": "MIT",
-  "homepage": "https://github.com/drudge/n8n-nodes-netsuite",
+  "homepage": "https://github.com/drowl87/n8n-nodes-netsuite",
   "engines": {
     "node": ">=18.17"
   },
   "author": "Nicholas Penree <nick@penree.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/drudge/n8n-nodes-netsuite.git"
+    "url": "https://github.com/drowl87/n8n-nodes-netsuite.git"
   },
   "main": "index.js",
   "scripts": {
@@ -42,6 +42,11 @@
       "dist/nodes/NetSuite/NetSuite.node.js"
     ]
   },
+  "contributors": [
+    "Nicholas Penree (@drudge)",
+    "Ian Dela Cruz (@ianpogi5)",
+    "David Rowley (@drowl87)"
+  ]
   "devDependencies": {
     "@eslint/config-array": "^0.19.2",
     "@eslint/object-schema": "^2.1.6",
@@ -56,10 +61,10 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
-    "@fye/netsuite-rest-api": "^2.3.1",
+    "@drowl87/netsuite-rest-api-client": "^1.0.1",
     "p-limit": "^3.1.0"
   },
   "bugs": {
-    "url": "https://github.com/drudge/n8n-nodes-netsuite/issues"
+    "url": "https://github.com/drowl87/n8n-nodes-netsuite/issues"
   }
 }
