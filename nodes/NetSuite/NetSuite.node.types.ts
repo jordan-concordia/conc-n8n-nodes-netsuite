@@ -28,7 +28,7 @@ export type INetSuiteRequestOptions = {
 	method: string;
 	body?: JsonObject | string;
 	headers?: Record<string, string>;
-	query?: Record<string, string | number | boolean>;
+	query?: Record<string, string | number | boolean> | string;
 	path?: string;
 	requestType: NetSuiteRequestType;
 };
