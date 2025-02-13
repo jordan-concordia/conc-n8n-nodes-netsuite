@@ -205,6 +205,7 @@ export class NetSuite implements INodeType {
 		        "Content-Type": "application/json",
 		        "Prefer": "transient",
 		    },
+			json: true,
 		};
 
 		// Temp logging for debugging:

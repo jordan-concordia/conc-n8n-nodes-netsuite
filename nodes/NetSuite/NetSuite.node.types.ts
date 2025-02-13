@@ -31,6 +31,7 @@ export type INetSuiteRequestOptions = {
 	query?: Record<string, string | number | boolean>;
 	path?: string;
 	requestType: NetSuiteRequestType;
+	json?: boolean;
 };
 
 export type INetSuiteResponse = {
