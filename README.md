@@ -35,14 +35,14 @@ For Docker-based deployments, add the following line before the font installatio
 ## Configuration
 
 ### NetSuite
-1. Go to `Setup > Company > Enable Features`, navigate to the `SuiteCloud` tab. Under `Manage Authentication`, make sure that `Token-Based Authentication` is enabled.
-2. Go to `Setup > Integration > Manage Integrations > New` and name it something like `n8n Integration` and add a description. Leave `Token-Based Authentication` enabled, but uncheck `TBA: Authorization Flow` and any of the checkboxes under the `OAuth 2.0` heading. Save the `Consumer Key/Secret` for future configuration with n8n.
-3. Go to `Setup > Users/Roles > Manage Roles > New` and make a custom role in NetSuite such as `REST API Integration - n8n`. **NOTE**: You may need to play around with permissions and add more if you are running into access errors.
-	- Under the `Authentication` header/dropdown, set it as a `Web services only` role
-	- Assign whatever `Transactions` or `Lists` permisions that align with your use case
-	- On `Setup`, make sure you assign at least `Log in using Access Tokens`, `User Access Tokens`, and `REST Web Services`
-4. Go to `Lists > Employees > Employees` and select a user. On the `Access` tab, assign the newly-created role.
-5. Go to `Setup > Users/Roles > Access Tokens > New`. Select the application name and user and role from above. Save the `Token Key/Secret` for future configuration with n8n.
+1. Go to **Setup > Company > Enable Features**, navigate to the **SuiteCloud** tab. Under **Manage Authentication**, make sure that `Token-Based Authentication` is enabled.
+2. Go to **Setup > Integration > Manage Integrations > New** and name it something like `n8n Integration` and add a description. Leave `Token-Based Authentication` enabled, but uncheck `TBA: Authorization Flow` and any of the checkboxes under the `OAuth 2.0` heading. Save the `Consumer Key/Secret` for configuration with n8n.
+3. Go to **Setup > Users/Roles > Manage Roles > New** and make a custom role in NetSuite such as `REST API Integration - n8n`. **NOTE**: You may need to play around with permissions and add more if you are running into access errors.
+	- Under the **Authentication** header/dropdown, set it as a `Web services only` role
+	- Assign whatever **Transactions** or **Lists** permisions that align with your use case
+	- On **Setup**, make sure you assign at least `Log in using Access Tokens`, `User Access Tokens`, and `REST Web Services`
+4. Go to **Lists > Employees > Employees** and select a user. On the `Access` tab, assign the newly-created role.
+5. Go to **Setup > Users/Roles > Access Tokens > New**. Select the application name and user and role from above. Save the `Token Key/Secret` for configuration with n8n.
 
 ### n8n
 1. Add NetSuite node to a workflow
