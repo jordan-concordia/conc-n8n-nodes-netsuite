@@ -208,7 +208,7 @@ export class NetSuite implements INodeType {
 		};
 
 		// Temp logging for debugging:
-    console.log('requestData:', JSON.stringify(requestData, null, 2));
+    	console.log('requestData:', JSON.stringify(requestData, null, 2));
 		
 		nodeContext.hasMore = hasMore;
 		nodeContext.count = limit;
