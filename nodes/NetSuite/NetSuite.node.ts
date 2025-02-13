@@ -199,7 +199,7 @@ export class NetSuite implements INodeType {
 		const requestData: INetSuiteRequestOptions = {
 		    method,
 		    requestType,
-		    query: { q: query },
+		    body: { q: query },
 		    path: `services/rest/query/${apiVersion}/suiteql${prefix}`,
 		    headers: {
 		        "Content-Type": "application/json",
