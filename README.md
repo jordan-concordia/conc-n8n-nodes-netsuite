@@ -4,7 +4,9 @@
 
 n8n node for interacting with NetSuite using [SuiteTalk REST Web Services](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1540391670.html).
 
-This project has been forked to extend a few additional transaction types in NetSuite. This community project and its dependencies and versions is [available here on NPM](https://www.npmjs.com/package/@drowl87/n8n-nodes-netsuite).
+This project has been forked to extend a few additional transaction types in NetSuite as well as patch several vulnerabilities in outdated dependencies.
+
+The community project and its dependencies and versions is [available here on NPM](https://www.npmjs.com/package/@drowl87/n8n-nodes-netsuite).
 
 ## How to install
 
