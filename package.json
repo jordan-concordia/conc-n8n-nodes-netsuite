@@ -10,7 +10,7 @@
   "author": "Nicholas Penree <nick@penree.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/drowl87/n8n-nodes-netsuite.git"
+    "url": "git+https://github.com/drowl87/n8n-nodes-netsuite.git"
   },
   "main": "index.js",
   "scripts": {
