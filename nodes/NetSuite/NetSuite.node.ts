@@ -206,6 +206,10 @@ export class NetSuite implements INodeType {
 		        "Prefer": "transient",
 		    },
 		};
+
+		// Temp logging for debugging:
+    console.log('requestData:', JSON.stringify(requestData, null, 2));
+		
 		nodeContext.hasMore = hasMore;
 		nodeContext.count = limit;
 		nodeContext.offset = offset;
