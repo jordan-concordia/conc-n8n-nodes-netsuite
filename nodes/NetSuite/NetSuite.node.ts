@@ -200,7 +200,7 @@ export class NetSuite implements INodeType {
 			method,
 			requestType,
 			// Wrap the SuiteQL query string in an object so it matches the expected type.
-			query: { query },
+			query: { q: query },
 			path: `services/rest/query/${apiVersion}/suiteql${prefix}`,
 		};
 		nodeContext.hasMore = hasMore;
