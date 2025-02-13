@@ -197,11 +197,14 @@ export class NetSuite implements INodeType {
 		config.netsuiteQueryLimit = limit;
 		prefix += params.toString();
 		const requestData: INetSuiteRequestOptions = {
-			method,
-			requestType,
-			// Wrap the SuiteQL query string in an object so it matches the expected type.
-			query: { q: query },
-			path: `services/rest/query/${apiVersion}/suiteql${prefix}`,
+		    method,
+		    requestType,
+		    query: { q: query },
+		    path: `services/rest/query/${apiVersion}/suiteql${prefix}`,
+		    headers: {
+		        "Content-Type": "application/json",
+		        "Prefer": "transient",
+		    },
 		};
 		nodeContext.hasMore = hasMore;
 		nodeContext.count = limit;
