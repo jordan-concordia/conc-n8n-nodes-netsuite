@@ -344,14 +344,14 @@ export class NetSuite implements INodeType {
 			try {
 				const parsedQuery = typeof query === 'string' ? JSON.parse(query) : (query as JsonObject);
 				requestData.body = parsedQuery;
-			} catch (e) {
+			} catch {
 				requestData.body = query as JsonObject | string | undefined; // Ensure compatibility
 			}
 		}
 		
 		// Manually strip "query" wrapper if it exists
-		if ((requestData.body as any)?.query) {
-			requestData.body = (requestData.body as any).query;
+		if ((requestData.body as Record<string, unknown>)?.query) {
+			requestData.body = (requestData.body as Record<string, unknown>).query;
 		}
 		
 		console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
