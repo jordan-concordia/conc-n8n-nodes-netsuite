@@ -329,42 +329,42 @@ export class NetSuite implements INodeType {
 		// The query can come as a string (body) or an object (from the item).
 		const query = body || (item ? item.json : undefined);
 		const nodeOptions = fns.getNodeParameter('options', 0) as IDataObject;
-
+	
 		if (path && (path.startsWith('https://') || path.startsWith('http://'))) {
 			const url = new URL(path);
 			path = `${url.pathname.replace(/^\//, '')}${url.search || ''}`;
 		}
-
+	
 		const requestData: INetSuiteRequestOptions = {
 			method,
 			requestType,
 			path,
 		};
+	
 		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
 			try {
 				const parsedQuery = typeof query === 'string' ? JSON.parse(query) : (query as JsonObject);
-				requestData.body = parsedQuery;
+				requestData.query = parsedQuery;
 			} catch {
-				requestData.body = query as JsonObject | string | undefined; // Ensure compatibility
+				requestData.query = query as JsonObject | string | undefined; // Ensure compatibility
 			}
 		}
-		
+	
 		// Manually strip "query" wrapper if it exists
-		if ((requestData.body as Record<string, unknown>)?.query) {
-			requestData.body = (requestData.body as Record<string, JsonObject | string | undefined>).query;
+		if ((requestData.query as Record<string, unknown>)?.query) {
+			requestData.query = (requestData.query as Record<string, JsonObject | string | undefined>).query;
 		}
 		
 		console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
-		// debug('requestData', requestData);
 		const response = await makeRequest(getConfig(credentials), requestData);
-
+	
 		if (response.body) {
 			nodeContext.hasMore = response.body.hasMore;
 			nodeContext.count = response.body.count;
 			nodeContext.offset = response.body.offset;
 			nodeContext.totalResults = response.body.totalResults;
 		}
-
+	
 		if (nodeOptions.fullResponse) {
 			return {
 				json: {
