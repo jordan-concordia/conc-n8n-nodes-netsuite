@@ -342,10 +342,10 @@ export class NetSuite implements INodeType {
 		};
 		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
 			try {
-				const parsedQuery = typeof query === 'string' ? JSON.parse(query) : query;
+				const parsedQuery = typeof query === 'string' ? JSON.parse(query) : (query as JsonObject);
 				requestData.body = parsedQuery;
 			} catch (e) {
-				requestData.body = query; // fallback
+				requestData.body = query as JsonObject | string | undefined; // Ensure compatibility
 			}
 		}
 		
