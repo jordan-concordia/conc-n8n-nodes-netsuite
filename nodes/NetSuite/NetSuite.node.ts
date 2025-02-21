@@ -351,7 +351,7 @@ export class NetSuite implements INodeType {
 		
 		// Manually strip "query" wrapper if it exists
 		if ((requestData.body as Record<string, unknown>)?.query) {
-			requestData.body = (requestData.body as Record<string, unknown>).query;
+			requestData.body = (requestData.body as Record<string, JsonObject | string | undefined>).query;
 		}
 		
 		console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
