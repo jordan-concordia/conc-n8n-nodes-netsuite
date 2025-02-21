@@ -341,10 +341,7 @@ export class NetSuite implements INodeType {
 			path,
 		};
 		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-			// If query is a string, wrap it; otherwise cast it.
-			requestData.query = typeof query === 'string'
-				? { query }
-				: query as Record<string, string | number | boolean>;
+			requestData.body = query;
 		}
 		// debug('requestData', requestData);
 		const response = await makeRequest(getConfig(credentials), requestData);
