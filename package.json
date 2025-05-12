@@ -1,13 +1,16 @@
 {
   "name": "@drowl87/n8n-nodes-netsuite",
-  "version": "0.7.25",
+  "version": "0.7.26",
   "description": "n8n node for NetSuite using the REST API. This version has a few security patches, extends additional transaction types, and fixes some syntax issues.",
   "license": "MIT",
   "homepage": "https://github.com/drowl87/n8n-nodes-netsuite",
   "engines": {
     "node": ">=18.17"
   },
-  "author": "Nicholas Penree <nick@penree.com>",
+  "author": {
+    "name": "David Rowley",
+    "email": "david@mygenius.co"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/drowl87/n8n-nodes-netsuite.git"
@@ -48,17 +51,17 @@
     ]
   },
   "devDependencies": {
-    "@eslint/config-array": "^0.19.2",
-    "@eslint/js": "^9.20.0",
+    "@eslint/config-array": "^0.20.0",
+    "@eslint/js": "^9.26.0",
     "@eslint/object-schema": "^2.1.6",
     "@types/node": "^18.19.39",
-    "@typescript-eslint/parser": "^8.24.0",
-    "eslint": "^9.20.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.26.0",
     "globals": "^15.15.0",
     "gulp": "^5.0.0",
     "n8n-workflow": "*",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
