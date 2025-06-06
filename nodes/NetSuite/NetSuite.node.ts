@@ -285,19 +285,36 @@ export class NetSuite implements INodeType {
 		const apiVersion = fns.getNodeParameter('version', itemIndex) as string;
 		const recordType = NetSuite.getRecordType(options);
 		// Expecting an object from the incoming item.
-		const query = item ? item.json : undefined;
+		const useCustomJson = fns.getNodeParameter('useCustomJson', itemIndex, false);
+		let query;
+		if (useCustomJson) {
+			const raw = fns.getNodeParameter('customJson', itemIndex);
+			if (typeof raw === 'string') {
+			try {
+				query = JSON.parse(raw);
+			} catch {
+				throw new Error('customJson must be valid JSON');
+			}
+			} else {
+			query = raw as Record<string, any>;
+			}
+		} else {
+			query = item?.json as Record<string, any> | undefined;
+		}
 		const requestData: INetSuiteRequestOptions = {
-			method: 'POST',
-			requestType: NetSuiteRequestType.Record,
-			path: `services/rest/record/${apiVersion}/${recordType}`,
+				method: 'POST',
+				requestType: NetSuiteRequestType.Record,
+				path: `services/rest/record/${apiVersion}/${recordType}`,
 		};
 		if (query) {
-			// Cast to the expected type.
-			requestData.query = query as Record<string, string | number | boolean>;
+				// Cast to the expected type.
+				requestData.query = query as Record<string, string | number | boolean>;
 		}
+		console.log('>>> n8n is about to send to NetSuite:', JSON.stringify(requestData, null, 2));
+		console.log(query);
 		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
-	}
+    }
 
 	static async updateRecord(options: INetSuiteOperationOptions): Promise<INodeExecutionData> {
 		const { fns, credentials, itemIndex, item } = options;
@@ -305,19 +322,36 @@ export class NetSuite implements INodeType {
 		const recordType = NetSuite.getRecordType(options);
 		const internalId = fns.getNodeParameter('internalId', itemIndex) as string;
 		// Expecting an object from the incoming item.
-		const query = item ? item.json : undefined;
+		const useCustomJson = fns.getNodeParameter('useCustomJson', itemIndex, false);
+		let query;
+		if (useCustomJson) {
+			const raw = fns.getNodeParameter('customJson', itemIndex);
+			if (typeof raw === 'string') {
+			try {
+				query = JSON.parse(raw);
+			} catch {
+				throw new Error('customJson must be valid JSON');
+			}
+			} else {
+			query = raw as Record<string, any>;
+			}
+		} else {
+			query = item?.json as Record<string, any> | undefined;
+		}
 		const requestData: INetSuiteRequestOptions = {
-			method: 'PATCH',
-			requestType: NetSuiteRequestType.Record,
-			path: `services/rest/record/${apiVersion}/${recordType}/${internalId}`,
+				method: 'PATCH',
+				requestType: NetSuiteRequestType.Record,
+				path: `services/rest/record/${apiVersion}/${recordType}/${internalId}`,
 		};
 		if (query) {
-			// Cast to the expected type.
-			requestData.query = query as Record<string, string | number | boolean>;
+				// Cast to the expected type.
+				requestData.query = query as Record<string, string | number | boolean>;
 		}
+		console.log('>>> n8n is about to send to NetSuite:', JSON.stringify(requestData, null, 2));
+		console.log(query);
 		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
-	}
+    }
 
 	static async rawRequest(options: INetSuiteOperationOptions): Promise<INodeExecutionData> {
 		const { fns, credentials, itemIndex, item } = options;

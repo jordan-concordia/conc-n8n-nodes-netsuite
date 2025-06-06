@@ -172,6 +172,7 @@ export const nodeDescription: INodeTypeDescription = {
 				{ name: "Email Template", value: "emailTemplate" },
 				{ name: "Employee", value: "employee" },
 				{ name: "Inventory Item", value: "inventoryItem" },
+    			{ name: "Kit Item", value: "kitItem" },
 				{ name: "Invoice", value: "invoice" },
 				{ name: "Item Fulfillment", value: "itemFulfillment" },
 				{ name: "Journal Entry", value: "journalEntry" },
@@ -299,6 +300,25 @@ export const nodeDescription: INodeTypeDescription = {
 			},
 			description:
 				"The names of sublists on this record. All sublist lines will be replaced with lines specified in the request. The sublists not specified here will have lines added to the record. The names are delimited by comma.",
+		},
+		{
+		displayName: 'Enable Custom JSON',
+		name: 'useCustomJson',
+		type: 'boolean',
+		default: false,
+		description: 'If true, send whatever you paste into the “JSON Body” field instead of auto-building the body from item.json.',
+		},
+		{
+		displayName: 'JSON Body',
+		name: 'customJson',
+		type: 'json',
+		default: {},
+		displayOptions: {
+			show: {
+			useCustomJson: [true],
+			},
+		},
+		description: 'Paste in a complete JSON object here to use as the HTTP body (instead of item.json).',
 		},
 		{
 			displayName: "Replace Selected Fields",
