@@ -364,15 +364,10 @@ export class NetSuite implements INodeType {
 		const query = body || (item ? item.json : undefined);
 		const nodeOptions = fns.getNodeParameter('options', 0) as IDataObject;
 	
-		if (path && (path.startsWith('https://') || path.startsWith('http://'))) {
-			const url = new URL(path);
-			path = `${url.pathname.replace(/^\//, '')}${url.search || ''}`;
-		}
-	
+		const fullUrl = `https://${credentials.hostname}${path}`;
 		const requestData: INetSuiteRequestOptions = {
 			method,
-			requestType,
-			path,
+			nextUrl: fullUrl,
 		};
 	
 		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
