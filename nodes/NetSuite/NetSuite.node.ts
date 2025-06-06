@@ -367,6 +367,7 @@ export class NetSuite implements INodeType {
 		const fullUrl = `https://${credentials.hostname}${path}`;
 		const requestData: INetSuiteRequestOptions = {
 			method,
+			requestType, 
 			nextUrl: fullUrl,
 		};
 	
