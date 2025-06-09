@@ -1,4 +1,5 @@
 import { debuglog } from 'util';
+import crypto from 'crypto';
 import {
 	IDataObject,
 	IExecuteFunctions,
@@ -24,19 +25,132 @@ import {
 
 import { makeRequest } from '@drowl87/netsuite-rest-api-client';
 import pLimit from '@common.js/p-limit';
+import fetch from 'node-fetch';
 
 const debug = debuglog('n8n-nodes-netsuite');
 
+// Custom function to make restlet requests without the Prefer header
+const makeRestletRequest = async (config: any, requestData: any) => {
+	const {
+		netsuiteApiHost,
+		consumerKey,
+		consumerSecret,
+		netsuiteAccountId,
+		netsuiteTokenKey,
+		netsuiteTokenSecret
+	} = config;
+
+	// Generate OAuth signature
+	const generateOAuthSignature = (method: string, url: string, params: any = {}) => {
+		const timestamp = Math.floor(Date.now() / 1000).toString();
+		const nonce = crypto.randomBytes(16).toString('hex');
+		
+		const oauthParams = {
+			oauth_consumer_key: consumerKey,
+			oauth_nonce: nonce,
+			oauth_signature_method: 'HMAC-SHA256',
+			oauth_timestamp: timestamp,
+			oauth_token: netsuiteTokenKey,
+			oauth_version: '1.0'
+		};
+
+		// Create parameter string
+		const allParams = { ...oauthParams, ...params };
+		const paramString = Object.keys(allParams)
+			.sort()
+			.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(allParams[key])}`)
+			.join('&');
+
+		// Create signature base string
+		const baseString = `${method.toUpperCase()}&${encodeURIComponent(url)}&${encodeURIComponent(paramString)}`;
+
+		// Create signing key
+		const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(netsuiteTokenSecret)}`;
+
+		// Generate signature
+		const signature = crypto.createHmac('sha256', signingKey).update(baseString).digest('base64');
+
+		return {
+			...oauthParams,
+			oauth_signature: signature
+		};
+	};
+
+	const url = requestData.nextUrl;
+	const method = requestData.method;
+	const body = requestData.query ? JSON.stringify(requestData.query) : undefined;
+
+	// Generate OAuth header
+	const oauthParams = generateOAuthSignature(method, url, {});
+	const authHeader = 'OAuth realm="' + netsuiteAccountId + '", ' + Object.keys(oauthParams)
+		.map(key => `${key}="${encodeURIComponent(oauthParams[key])}"`)
+		.join(', ');
+
+	// Make the request using node-fetch
+	const headers = {
+		'Authorization': authHeader,
+		'Content-Type': 'application/json',
+		'Accept': 'application/json',
+		'Accept-Language': 'en',
+		'Content-Language': 'en'
+		// Deliberately NOT including Prefer: transient
+	};
+
+	console.log('Custom restlet request - URL:', url);
+	console.log('Custom restlet request - Method:', method);
+	console.log('Custom restlet request - Headers:', headers);
+	console.log('Custom restlet request - Body:', body);
+
+	try {
+		const response = await fetch(url, {
+			method,
+			headers,
+			body
+		});
+
+		const responseText = await response.text();
+		let responseBody;
+		
+		try {
+			responseBody = JSON.parse(responseText);
+		} catch {
+			responseBody = responseText;
+		}
+
+		console.log('Custom restlet response - Status:', response.status);
+		console.log('Custom restlet response - Body:', responseBody);
+
+		return {
+			statusCode: response.status,
+			statusText: response.statusText,
+			headers: Object.fromEntries(response.headers.entries()),
+			body: responseBody,
+			request: {
+				options: {
+					method,
+					headers,
+					url
+				}
+			}
+		};
+	} catch (error) {
+		console.error('Custom restlet request failed:', error);
+		throw error;
+	}
+};
+
 // Create a wrapper function to handle the prefer header removal for restlets
 const makeNetSuiteRequest = async (config: any, requestData: any) => {
-	// Only strip 'Prefer' header for rawRequest calls that use nextUrl (restlets)
-	if (requestData.nextUrl && requestData.requestType === 'record' && requestData.headers) {
-		// Create a copy of headers to avoid mutating the original
-		const cleanHeaders = { ...requestData.headers };
-		delete cleanHeaders.prefer;
-		delete cleanHeaders.Prefer;
-		requestData = { ...requestData, headers: cleanHeaders };
+	// Check if this is a restlet request
+	const isRestletRequest = requestData.nextUrl && requestData.nextUrl.includes('restlets.api.netsuite.com');
+	
+	if (isRestletRequest) {
+		console.log('Detected restlet request, using custom request function');
+		return makeRestletRequest(config, requestData);
 	}
+	
+	// For non-restlet requests, use the original client
+	console.log('Using standard NetSuite client');
 	return makeRequest(config, requestData);
 };
 
@@ -414,11 +528,11 @@ export class NetSuite implements INodeType {
 		console.log('>>> NetSuite client config:', JSON.stringify(getConfig(credentials), null, 2));
 		console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
 		
-		// Use our custom wrapper function that handles the prefer header removal
+		// Use our custom wrapper function that handles restlet requests
 		const response = await makeNetSuiteRequest(getConfig(credentials), requestData);
 		
-		console.log('FINAL HTTP OPTIONS:', response.request.options);
-		console.log('AUTH HEADER:', response.request.options.headers.authorization);
+		console.log('Response status:', response.statusCode);
+		console.log('Response body:', response.body);
 	
 		if (response.body) {
 			nodeContext.hasMore = response.body.hasMore;

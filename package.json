@@ -68,7 +68,8 @@
   },
   "dependencies": {
     "@drowl87/netsuite-rest-api-client": "^1.0.2",
-    "@common.js/p-limit": "^6.1.0"
+    "@common.js/p-limit": "^6.1.0",
+    "node-fetch": "^3.3.2"
   },
   "bugs": {
     "url": "https://github.com/drowl87/n8n-nodes-netsuite/issues"
