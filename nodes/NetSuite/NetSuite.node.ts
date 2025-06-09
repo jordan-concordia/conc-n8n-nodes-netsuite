@@ -22,6 +22,7 @@ import {
 	nodeDescription,
 } from './NetSuite.node.options';
 
+import { makeRequest } from '@drowl87/netsuite-rest-api-client';
 import * as nsClient from '@drowl87/netsuite-rest-api-client';
 import pLimit from '@common.js/p-limit';
 
@@ -153,7 +154,7 @@ export class NetSuite implements INodeType {
 		nodeContext.offset = offset;
 		// debug('requestData', requestData);
 		while ((returnAll || returnData.length < limit) && hasMore === true) {
-			const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+			const response = await makeRequest(getConfig(credentials), requestData);
 			const body: JsonObject = handleNetsuiteResponse(fns, response);
 			const { hasMore: doContinue, items, links, offset, count, totalResults } = (body.json as INetSuitePagedBody);
 			if (doContinue) {
@@ -223,7 +224,7 @@ export class NetSuite implements INodeType {
 		nodeContext.offset = offset;
 		debug('requestData', requestData);
 		while ((returnAll || returnData.length < limit) && hasMore === true) {
-			const response = await nsClient.makeRequest(config, requestData);
+			const response = await makeRequest(config, requestData);
 			const body: JsonObject = handleNetsuiteResponse(fns, response);
 			const { hasMore: doContinue, items, links, count, totalResults, offset } = (body.json as INetSuitePagedBody);
 			if (doContinue) {
@@ -269,7 +270,7 @@ export class NetSuite implements INodeType {
 			requestType: NetSuiteRequestType.Record,
 			path: `services/rest/record/${apiVersion}/${recordType}/${internalId}${q ? `?${q}` : ''}`,
 		};
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		if (item) response.body.orderNo = item.json.orderNo;
 		return handleNetsuiteResponse(fns, response);
 	}
@@ -284,7 +285,7 @@ export class NetSuite implements INodeType {
 			requestType: NetSuiteRequestType.Record,
 			path: `services/rest/record/${apiVersion}/${recordType}/${internalId}`,
 		};
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
 	}
 
@@ -320,7 +321,7 @@ export class NetSuite implements INodeType {
 		}
 		console.log('>>> n8n is about to send to NetSuite:', JSON.stringify(requestData, null, 2));
 		console.log(query);
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
     }
 
@@ -357,7 +358,7 @@ export class NetSuite implements INodeType {
 		}
 		console.log('>>> n8n is about to send to NetSuite:', JSON.stringify(requestData, null, 2));
 		console.log(query);
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
     }
 
@@ -397,9 +398,10 @@ export class NetSuite implements INodeType {
 			}
 		}
 	
-                if (typeof requestData.query === 'object' && 'query' in requestData.query) {
-  					requestData.query = (requestData.query as any).query;
-		}
+		// Manually strip "query" wrapper if it exists
+                if ((requestData.query as Record<string, unknown>)?.query) {
+                        requestData.query = ((requestData.query as Record<string, unknown>).query) as Record<string, string | >
+                }
 
                 console.log('URL:', requestData.nextUrl || `https://${credentials.hostname}${path}`);
                 console.log('Method:', requestData.method);
