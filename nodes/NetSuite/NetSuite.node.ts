@@ -22,19 +22,23 @@ import {
 	nodeDescription,
 } from './NetSuite.node.options';
 
-import * as nsClient from '@drowl87/netsuite-rest-api-client';
+import { makeRequest } from '@drowl87/netsuite-rest-api-client';
 import pLimit from '@common.js/p-limit';
 
-const originalMakeRequest = nsClient.makeRequest;
-(nsClient as any).makeRequest = async (config: any, requestData: any) => {
-  // Only strip 'prefer' for rawRequest calls (which use nextUrl)
-  if (requestData.nextUrl && requestData.requestType === 'record' && requestData.headers) {
-    delete requestData.headers.prefer;
-  }
-  return originalMakeRequest(config, requestData);
-};
-
 const debug = debuglog('n8n-nodes-netsuite');
+
+// Create a wrapper function to handle the prefer header removal for restlets
+const makeNetSuiteRequest = async (config: any, requestData: any) => {
+	// Only strip 'Prefer' header for rawRequest calls that use nextUrl (restlets)
+	if (requestData.nextUrl && requestData.requestType === 'record' && requestData.headers) {
+		// Create a copy of headers to avoid mutating the original
+		const cleanHeaders = { ...requestData.headers };
+		delete cleanHeaders.prefer;
+		delete cleanHeaders.Prefer;
+		requestData = { ...requestData, headers: cleanHeaders };
+	}
+	return makeRequest(config, requestData);
+};
 
 const handleNetsuiteResponse = (fns: IExecuteFunctions, response: INetSuiteResponse) => {
 	// debug(response);
@@ -153,7 +157,7 @@ export class NetSuite implements INodeType {
 		nodeContext.offset = offset;
 		// debug('requestData', requestData);
 		while ((returnAll || returnData.length < limit) && hasMore === true) {
-			const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+			const response = await makeRequest(getConfig(credentials), requestData);
 			const body: JsonObject = handleNetsuiteResponse(fns, response);
 			const { hasMore: doContinue, items, links, offset, count, totalResults } = (body.json as INetSuitePagedBody);
 			if (doContinue) {
@@ -223,7 +227,7 @@ export class NetSuite implements INodeType {
 		nodeContext.offset = offset;
 		debug('requestData', requestData);
 		while ((returnAll || returnData.length < limit) && hasMore === true) {
-			const response = await nsClient.makeRequest(config, requestData);
+			const response = await makeRequest(config, requestData);
 			const body: JsonObject = handleNetsuiteResponse(fns, response);
 			const { hasMore: doContinue, items, links, count, totalResults, offset } = (body.json as INetSuitePagedBody);
 			if (doContinue) {
@@ -269,7 +273,7 @@ export class NetSuite implements INodeType {
 			requestType: NetSuiteRequestType.Record,
 			path: `services/rest/record/${apiVersion}/${recordType}/${internalId}${q ? `?${q}` : ''}`,
 		};
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		if (item) response.body.orderNo = item.json.orderNo;
 		return handleNetsuiteResponse(fns, response);
 	}
@@ -284,7 +288,7 @@ export class NetSuite implements INodeType {
 			requestType: NetSuiteRequestType.Record,
 			path: `services/rest/record/${apiVersion}/${recordType}/${internalId}`,
 		};
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
 	}
 
@@ -320,7 +324,7 @@ export class NetSuite implements INodeType {
 		}
 		console.log('>>> n8n is about to send to NetSuite:', JSON.stringify(requestData, null, 2));
 		console.log(query);
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
     }
 
@@ -357,7 +361,7 @@ export class NetSuite implements INodeType {
 		}
 		console.log('>>> n8n is about to send to NetSuite:', JSON.stringify(requestData, null, 2));
 		console.log(query);
-		const response = await nsClient.makeRequest(getConfig(credentials), requestData);
+		const response = await makeRequest(getConfig(credentials), requestData);
 		return handleNetsuiteResponse(fns, response);
     }
 
@@ -379,7 +383,7 @@ export class NetSuite implements INodeType {
 			nextUrl: fullUrl,
 			headers: {
 				'Content-Type': 'application/json',
-    			'Accept':       'application/json',
+    			'Accept': 'application/json',
 			}
 		};
 	
@@ -397,20 +401,24 @@ export class NetSuite implements INodeType {
 			}
 		}
 	
-                if (typeof requestData.query === 'object' && 'query' in requestData.query) {
-  					requestData.query = (requestData.query as any).query;
+		// Manually strip "query" wrapper if it exists
+		if (typeof requestData.query === 'object' && 'query' in requestData.query) {
+			requestData.query = (requestData.query as any).query;
 		}
 
-                console.log('URL:', requestData.nextUrl || `https://${credentials.hostname}${path}`);
-                console.log('Method:', requestData.method);
-                console.log('Headers:', requestData.headers);
-                console.log('Body:', requestData.query);
+		console.log('URL:', requestData.nextUrl || `https://${credentials.hostname}${path}`);
+		console.log('Method:', requestData.method);
+		console.log('Headers:', requestData.headers);
+		console.log('Body:', requestData.query);
 
-                console.log('>>> NetSuite client config:', JSON.stringify(getConfig(credentials), null, 2));
-                console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
-                const response = await nsClient.makeRequest(getConfig(credentials), requestData);
-                console.log('FINAL HTTP OPTIONS:', response.request.options);
-                console.log('AUTH HEADER:', response.request.options.headers.authorization);
+		console.log('>>> NetSuite client config:', JSON.stringify(getConfig(credentials), null, 2));
+		console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
+		
+		// Use our custom wrapper function that handles the prefer header removal
+		const response = await makeNetSuiteRequest(getConfig(credentials), requestData);
+		
+		console.log('FINAL HTTP OPTIONS:', response.request.options);
+		console.log('AUTH HEADER:', response.request.options.headers.authorization);
 	
 		if (response.body) {
 			nodeContext.hasMore = response.body.hasMore;
