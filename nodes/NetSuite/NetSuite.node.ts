@@ -41,7 +41,7 @@ const makeRestletRequest = async (config: any, requestData: any) => {
 	} = config;
 
 	// Generate OAuth signature
-	const generateOAuthSignature = (method: string, url: string, params: any = {}) => {
+	const generateOAuthSignature = (method: string, url: string, extraParams: any = {}) => {
 		const timestamp = Math.floor(Date.now() / 1000).toString();
 		const nonce = crypto.randomBytes(16).toString('hex');
 		
@@ -55,15 +55,17 @@ const makeRestletRequest = async (config: any, requestData: any) => {
 		};
 
 		// Create parameter string
-		const allParams = { ...oauthParams, ...params };
+		const urlObj      = new URL(url);
+    	const queryParams = Object.fromEntries(urlObj.searchParams.entries());
+    	const allParams   = { ...oauthParams, ...queryParams, ...extraParams };
 		const paramString = Object.keys(allParams)
 			.sort()
 			.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(allParams[key])}`)
 			.join('&');
 
 		// Create signature base string
-		const baseString = `${method.toUpperCase()}&${encodeURIComponent(url)}&${encodeURIComponent(paramString)}`;
-
+		const baseUrl    = `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`;
+    	const baseString = `${method.toUpperCase()}&${encodeURIComponent(baseUrl)}&${encodeURIComponent(paramString)}`;
 		// Create signing key
 		const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(netsuiteTokenSecret)}`;
 
