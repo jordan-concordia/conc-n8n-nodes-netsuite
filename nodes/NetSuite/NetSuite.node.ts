@@ -23,17 +23,8 @@ import {
 } from './NetSuite.node.options';
 
 import { makeRequest } from '@drowl87/netsuite-rest-api-client';
-import * as nsClient from '@drowl87/netsuite-rest-api-client';
-import pLimit from '@common.js/p-limit';
 
-const originalMakeRequest = nsClient.makeRequest;
-(nsClient as any).makeRequest = async (config: any, requestData: any) => {
-  // Only strip 'prefer' for rawRequest calls (which use nextUrl)
-  if (requestData.nextUrl && requestData.requestType === 'record' && requestData.headers) {
-    delete requestData.headers.prefer;
-  }
-  return originalMakeRequest(config, requestData);
-};
+import pLimit from '@common.js/p-limit';
 
 const debug = debuglog('n8n-nodes-netsuite');
 
@@ -378,10 +369,6 @@ export class NetSuite implements INodeType {
 			method,
 			requestType, 
 			nextUrl: fullUrl,
-			headers: {
-				'Content-Type': 'application/json',
-    			'Accept':       'application/json',
-			}
 		};
 	
 		if (query && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
@@ -399,20 +386,12 @@ export class NetSuite implements INodeType {
 		}
 	
 		// Manually strip "query" wrapper if it exists
-                if ((requestData.query as Record<string, unknown>)?.query) {
-                        requestData.query = ((requestData.query as Record<string, unknown>).query) as Record<string, string | >
-                }
-
-                console.log('URL:', requestData.nextUrl || `https://${credentials.hostname}${path}`);
-                console.log('Method:', requestData.method);
-                console.log('Headers:', requestData.headers);
-                console.log('Body:', requestData.query);
-
-                console.log('>>> NetSuite client config:', JSON.stringify(getConfig(credentials), null, 2));
-                console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
-                const response = await nsClient.makeRequest(getConfig(credentials), requestData);
-                console.log('FINAL HTTP OPTIONS:', response.request.options);
-                console.log('AUTH HEADER:', response.request.options.headers.authorization);
+		if ((requestData.query as Record<string, unknown>)?.query) {
+			requestData.query = ((requestData.query as Record<string, unknown>).query) as Record<string, string | number | boolean>;
+		}
+		
+		console.log('Final cleaned requestData:', JSON.stringify(requestData, null, 2));
+		const response = await makeRequest(getConfig(credentials), requestData);
 	
 		if (response.body) {
 			nodeContext.hasMore = response.body.hasMore;
