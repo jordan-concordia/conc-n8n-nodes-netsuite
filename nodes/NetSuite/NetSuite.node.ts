@@ -481,7 +481,7 @@ export class NetSuite implements INodeType {
 		return handleNetsuiteResponse(fns, response);
     }
 
-	static async rawRequest(options: INetSuiteOperationOptions): Promise<INodeExecutionData> {
+	static async rawRequest(options: INetSuiteOperationOptions): Promise<INodeExecutionData | INodeExecutionData[]> {
 		const { fns, credentials, itemIndex, item } = options;
 		const nodeContext = fns.getContext('node');
 		let path = fns.getNodeParameter('path', itemIndex) as string;
@@ -552,7 +552,12 @@ export class NetSuite implements INodeType {
 				},
 			};
 		} else {
+			if (Array.isArray(response.body)) {
+			console.log(`Splitting array response into ${response.body.length} individual items`);
+			return response.body.map((item: any) => ({ json: item }));
+		} else {
 			return { json: response.body };
+		}
 		}
 	}
 
